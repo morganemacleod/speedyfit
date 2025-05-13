@@ -147,7 +147,7 @@ def plot_constraints(constraints, samples, results):
       pl.title(par)
 
  
-def plot_fit(obs, obs_err, photbands, pars={}, constraints={}, grids=[], gridnames=[], result='best', plot_components=True, plot_colors=False, plot_constraints=False):
+def plot_fit(obs, obs_err, photbands, pars={}, constraints={}, grids=[], gridnames=[], result='best', plot_components=True, plot_colors=False, plot_constraints=False,rv=3.1):
    
    pars = pars.copy()
    
@@ -201,7 +201,7 @@ def plot_fit(obs, obs_err, photbands, pars={}, constraints={}, grids=[], gridnam
          #-- synthetic model
          ebv = pars['ebv']
          wave, flux = model.get_table(grid=gridnames, **pars)
-         flux = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law='fitzpatrick2004')
+         flux = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law='fitzpatrick2004',Rv=rv)
          
          #ascii.write([wave, scale*flux], 'binary_model.txt', names=['wave', 'flux'], overwrite=True)
          
@@ -210,12 +210,12 @@ def plot_fit(obs, obs_err, photbands, pars={}, constraints={}, grids=[], gridnam
          #-- plot components
          if plot_components and 'teff2' in pars:
             wave, flux = model.get_table(grid=gridnames[0], teff=pars['teff'], logg=pars['logg'], rad=pars['rad'], ebv=pars['ebv'])
-            flux = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law='fitzpatrick2004')
+            flux = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law='fitzpatrick2004',Rv=rv)
             #ascii.write([wave, scale*flux], 'primary_model.txt', names=['wave', 'flux'], overwrite=True)
             pl.plot(wave, scale*flux, '--g')
             
             wave, flux = model.get_table(grid=gridnames[1], teff=pars['teff2'], logg=pars['logg2'], rad=pars['rad2'], ebv=pars['ebv'])
-            flux = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law='fitzpatrick2004')
+            flux = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law='fitzpatrick2004',Rv=rv)
             #ascii.write([wave, scale*flux], 'secondary_model.txt', names=['wave', 'flux'], overwrite=True)
             pl.plot(wave, scale*flux, '--b')
          

@@ -291,7 +291,7 @@ def plot_results(setup, results, samples, constraints, gridnames, obs, obs_err, 
             pl.clf()
             pl.subplots_adjust(wspace=0.25)
             plotting.plot_fit(obs, obs_err, photbands, pars=results, constraints=constraints, grids=setup['grids'],
-                              gridnames=gridnames, result=res)
+                              gridnames=gridnames, result=res, rv=setup[pindex]['rv'])
 
             if not setup[pindex].get('path', None) is None:
                 pl.savefig(setup[pindex].get('path', 'sed_fit.png'))
