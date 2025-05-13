@@ -1,5 +1,12 @@
-kurucz:
+kurucz25:
     filename: 'kurucz93_z0.0_k2odfnew_sed'
+    integrated_filename: 'ikurucz93_z0.0_k2odfnew_sed_lawfitzpatrick2004_Rv2.50'
+kurucz31:
+    filename: 'kurucz93_z0.0_k2odfnew_sed'
+    integrated_filename: 'ikurucz93_z0.0_k2odfnew_sed_lawfitzpatrick2004_Rv3.10'
+
+
+## OLD FORMAT BELOW
 kurucz2:
     # included to be backwards compatible
     filename: 'kurucz93_z0.0_k2odfnew_sed'

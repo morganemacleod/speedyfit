@@ -119,7 +119,7 @@ def validate_setup(setup):
 
     # check derived limits
     assert type(setup['derived_limits']) is dict, "Derived limits need to be provided as a dictionary in the setup."
-
+    
     return True
 
 
@@ -244,11 +244,13 @@ def fit_sed(setup, photbands, obs, obs_err):
 def write_results(setup, results, samples, obs, obs_err, photbands):
 
     outpars, outvals = [], []
-    for par in ['teff', 'logg', 'L', 'rad']:
+    for par in ['teff', 'logg', 'L', 'rad','ebv']:
         outpars.append(par)
-        outpars.append(par + '_err')
+        outpars.append(par + '_err-')
+        outpars.append(par + '_err+')
         outvals.append(results[par][1])
-        outvals.append(np.average([results[par][2], results[par][3]]))
+        outvals.append(results[par][2])
+        outvals.append(results[par][3])
 
     if 'teff2' in results:
         for par in ['teff2', 'logg2', 'L2', 'rad2']:
@@ -487,6 +489,7 @@ def main():
     fit_parser.add_argument('--noplot', dest='noplot', action='store_true',
                             help="Don't show any plots, only save to disk.")
     fit_parser.set_defaults(func=perform_fit)
+
 
     # --check grids--
     grid_parser = subparsers.add_parser('checkgrids', help='Check which model atmosphere grids are installed')

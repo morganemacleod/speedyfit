@@ -9,7 +9,8 @@ from astropy.io import fits
 from speedyfit import interpol, filters
 
 __defaults__ = dict(grid='kurucz',
-                    directory='../sed_models/' ) #os.environ.get('SPEEDYFIT_MODELS', None), )
+                    directory=os.environ.get('SPEEDYFIT_MODELS', None)
+                    ) 
 defaults = __defaults__.copy()
 
 # load a list of all available integrated grids
@@ -74,23 +75,27 @@ def check_grids(print_bands=False):
 
 
 def get_grid_file(integrated=False, **kwargs):
+    
     grid = kwargs.get('grid', defaults['grid'])
-
+    
     if os.path.isfile(grid):
         return grid
 
     if grid in grid_description:
         filename = grid_description[grid]['filename']
+        integrated_filename = grid_description[grid]['integrated_filename']
     else:
         raise ValueError(f'Grid name ({grid}) not recognized!')
 
     if integrated:
-        filename = 'i' + filename + '_lawfitzpatrick2004_Rv3.10'
+        myfile = integrated_filename
+    else:
+        myfile = filename
 
     directory = kwargs.get('directory', defaults['directory'])
 
-    print("FILENAME:",os.path.join(directory, filename + '.fits') )
-    return os.path.join(directory, filename + '.fits')
+    print("FILENAME:",os.path.join(directory, myfile + '.fits') )
+    return os.path.join(directory,myfile + '.fits')
 
 
 def get_grid_ranges(**kwargs):
@@ -153,7 +158,7 @@ def get_grid_dimensions(**kwargs):
     return teffs, loggs
 
 
-def load_grids(gridnames, pnames, limits, photbands):
+def load_grids(gridnames, pnames, limits, photbands,**kwargs):
     """
     prepares the integrated photometry grid by loading the grid and cutting it to the size
     given in limits.
@@ -166,7 +171,8 @@ def load_grids(gridnames, pnames, limits, photbands):
                                                                      teffrange=limits[pnames.index('teff' + ind)],
                                                                      loggrange=limits[pnames.index('logg' + ind)],
                                                                      ebvrange=limits[pnames.index('ebv')],
-                                                                     variables=['teff', 'logg', 'ebv'])
+                                                                     variables=['teff', 'logg', 'ebv'],
+                                                                     **kwargs)
 
         grids.append([axis_values, pixelgrid])
 
@@ -181,7 +187,7 @@ def prepare_grid(photbands, gridname,
     grid_pars = []
     grid_names = np.array(variables)
 
-    gridfilename = get_grid_file(integrated=True, grid=gridname)
+    gridfilename = get_grid_file(integrated=True, grid=gridname,**kwargs)
 
     with fits.open(gridfilename) as ff:
         # -- make an alias for further reference
@@ -190,7 +196,7 @@ def prepare_grid(photbands, gridname,
         # -- the grid is already cut here to limit memory usage
         keep = np.ones(len(ext.data), bool)
         for name in variables:
-            # -- first find the closest actuall grid points
+            # -- first find the closest actual grid points
             low, high = locals()[name + 'range']
             lidx = np.abs(ext.data.field(name)[ext.data.field(name) <= low] - low).argmin()
             hidx = np.abs(ext.data.field(name)[ext.data.field(name) >= high] - high).argmin()
@@ -214,6 +220,7 @@ def prepare_grid(photbands, gridname,
 
 
 def get_itable_single(teff=None, logg=None, g=None, ebv=0.0, **kwargs):
+    
     # -- check if logg or g is given
     if logg is None and not g is None:
         logg = np.log10(g)
@@ -232,7 +239,8 @@ def get_itable_single(teff=None, logg=None, g=None, ebv=0.0, **kwargs):
                                                                      teffrange=(np.min(teff), np.max(teff)),
                                                                      loggrange=(np.min(logg), np.max(logg)),
                                                                      ebvrange=(np.min(ebv), np.max(ebv)),
-                                                                     variables=['teff', 'logg', 'ebv'])
+                                                                     variables=['teff', 'logg', 'ebv']
+                                                                    )
     else:
         axis_values, pixelgrid = kwargs['grid']
 

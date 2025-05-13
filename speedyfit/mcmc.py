@@ -136,7 +136,7 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 def MCMC(obs, obs_err, photbands,
          pnames, limits, grids,
          fixed_variables={}, constraints={}, derived_limits={},
-         nwalkers=100, nsteps=1000, nrelax=150, a=10, pos=None):
+         nwalkers=100, nsteps=1000, nrelax=150, a=10, pos=None,rv_string='3.10'):
 
     #-- check which bands are colors
     colors = np.array([filters.is_color(photband) for photband in photbands], bool)
@@ -156,7 +156,8 @@ def MCMC(obs, obs_err, photbands,
               'fixed_variables':fixed_variables,
               'constraints':constraints,
               'derived_limits':derived_limits,
-              'prop_func': statfunc.get_derived_properties}
+              'prop_func': statfunc.get_derived_properties,
+              'rv_string':rv_string}
 
     # TODO: storing the blobs as dictionary with dtype object and then later converting to recarray is inefficient.
     # This needs to be addressed: provide the correct dtypes here and let emcee directly store them in recarray
