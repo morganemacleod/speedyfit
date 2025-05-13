@@ -285,13 +285,15 @@ def plot_results(setup, results, samples, constraints, gridnames, obs, obs_err, 
 
         if setup[pindex]['type'] == 'sed_fit':
 
+            myrv = setup[pindex].get('rv',3.1)
+
             res = setup[pindex].get('result', 'best')
 
             pl.figure(i)
             pl.clf()
             pl.subplots_adjust(wspace=0.25)
             plotting.plot_fit(obs, obs_err, photbands, pars=results, constraints=constraints, grids=setup['grids'],
-                              gridnames=gridnames, result=res, rv=setup[pindex]['rv'])
+                              gridnames=gridnames, result=res, rv=myrv)
 
             if not setup[pindex].get('path', None) is None:
                 pl.savefig(setup[pindex].get('path', 'sed_fit.png'))
