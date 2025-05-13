@@ -9,7 +9,7 @@ from astropy.io import fits
 from speedyfit import interpol, filters
 
 __defaults__ = dict(grid='kurucz',
-                    directory=os.environ.get('SPEEDYFIT_MODELS', None), )
+                    directory='../sed_models/' ) #os.environ.get('SPEEDYFIT_MODELS', None), )
 defaults = __defaults__.copy()
 
 # load a list of all available integrated grids
@@ -89,6 +89,7 @@ def get_grid_file(integrated=False, **kwargs):
 
     directory = kwargs.get('directory', defaults['directory'])
 
+    print("FILENAME:",os.path.join(directory, filename + '.fits') )
     return os.path.join(directory, filename + '.fits')
 
 
@@ -96,9 +97,9 @@ def get_grid_ranges(**kwargs):
     grid = kwargs.get('grid', defaults['grid'])
 
     if grid == 'kurucz' or grid == 'kurucz2': # kurucz2 is necessary for backwards compatibility
-        teff = (3500, 10000)
-        logg = (4.32, 4.32)
-        rad = (0.05, 2.5)
+        teff = (3500, 49000)
+        logg = (0, 5)
+        rad = (0.05, 1000)
 
     elif grid == 'munari':
         teff = (3500, 20000)

@@ -26,9 +26,15 @@ def lnlike(pars, derived_properties, y, yerr, **kwargs):
         extra_drv['lr'] = extra_drv['L'] / extra_drv['L2']
     derived_properties.update(extra_drv)
 
-
+    if 'lns' in pars:
+        yerr_adjust = yerr*np.exp(pars['lns'])
+    elif 'lne' in pars:
+        yerr_adjust = np.sqrt(yerr**2 + (y*np.exp(pars['lne']))**2 )
+    else:
+        yerr_adjust = yerr
+        
     chi2, scales, e_scales = stat_func(y,
-                                       yerr,
+                                       yerr_adjust,
                                        colors, y_syn, pars,
                                        derived_properties=derived_properties,
                                        constraints=constraints)
@@ -39,7 +45,9 @@ def lnlike(pars, derived_properties, y, yerr, **kwargs):
     extra_drv['scale'] = scales
     extra_drv['chi2'] = chi2
 
-    return -chi2/2, extra_drv
+    yerr_term = np.sum(np.log(2*np.pi*yerr_adjust**2) )
+    
+    return -(chi2 + yerr_term)/2 , extra_drv
 
 def lnprior(theta, derived_properties, limits, **kwargs):
     """

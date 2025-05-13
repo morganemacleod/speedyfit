@@ -1,0 +1,13 @@
+kurucz:
+    filename: 'kurucz93_z0.0_k2odfnew_sed'
+kurucz2:
+    # included to be backwards compatible
+    filename: 'kurucz93_z0.0_k2odfnew_sed'
+    info: "This grid is included for backwards compatibility. It is the same as 'kurucz'"
+munari:
+    filename: 'Munari2005_extended'
+tmap:
+    filename: 'TMAP2012_sdOB_extended'
+blackbody:
+    filename: 'blackbody_discint'
+

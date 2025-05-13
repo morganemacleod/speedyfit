@@ -280,7 +280,7 @@ def plot_fit(obs, obs_err, photbands, pars={}, constraints={}, grids=[], gridnam
       
       pl.errorbar(w, -y , yerr=yerr, ls='', marker='o', color=system_colors[system])
    
-   pl.figtext(0.96, 0.96, '$\chi^2$ = {:0.2f}'.format(pars['chi2']), ha='right')
+   pl.figtext(0.96, 0.96, '$\chi^2/N$ = {:0.2f}'.format(pars['chi2']/len(y)), ha='right')
    
    pl.axhline(y=0, color='k', ls='--')
    

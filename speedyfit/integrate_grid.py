@@ -42,12 +42,14 @@ def get_responses(responses=None, wave=(0, np.inf)):
 
     # -- if no responses are given, select using wavelength range
     if responses is None:
+        print("replacing None responses with full list")
         responses = filters.list_response(wave_range=(wave[0], wave[-1]))
     else:
         responses_ = []
         for resp in responses:
             print('... subselection: {}'.format(resp))
             responses_ += filters.list_response(resp)
+            print('.......has filters',filters.list_response(resp))
         responses = responses_
     # -- get information on the responses
     responses = [resp for resp in responses if not (
@@ -107,7 +109,17 @@ def get_threads(threads, max=np.inf):
 #
 #         results = process_ebvs(wave, flux, ebvs)
 
-        
+# -- definition of one process for multi processing:
+def do_ebv_process(wave,flux,ebvs, arr, responses,law,Rv):
+    # Run over all reddening values, calculate the reddened model and integrate it over all photbands.
+    for ebv in ebvs:
+        # redden the model
+        flux_ = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law=law, Rv=Rv)
+        # calculate synthetic fluxes
+        synflux = filters.synthetic_flux(wave, flux_, responses)
+        # append to results
+        arr.append([np.concatenate(([ebv], synflux))])
+
 
 def calc_integrated_grid(threads=1, ebvs=np.r_[0:2.01:0.01], law='fitzpatrick2004', Rv=3.1, responses=None, grid=None):
     """
@@ -152,19 +164,6 @@ def calc_integrated_grid(threads=1, ebvs=np.r_[0:2.01:0.01], law='fitzpatrick200
 
     responses = get_responses(responses=responses, wave=wave)
 
-    # -- definition of one process for multi processing:
-    def do_ebv_process(ebvs, arr, responses):
-        # Run over all reddening values, calculate the reddened model and integrate it over all photbands.
-        for ebv in ebvs:
-            # redden the model
-            flux_ = reddening.redden(flux, wave=wave, ebv=ebv, rtype='flux', law=law, Rv=Rv)
-
-            # calculate synthetic fluxes
-            synflux = filters.synthetic_flux(wave, flux_, responses)
-
-            # append to results
-            arr.append([np.concatenate(([ebv], synflux))])
-
     # -- prepare the array containing the integrated fluxes
     #   (1 row per model, 1 column for each response curve and teff, logg, ebv and total luminosity)
     output = np.zeros((len(teffs) * len(ebvs), 4 + len(responses)))
@@ -189,7 +188,7 @@ def calc_integrated_grid(threads=1, ebvs=np.r_[0:2.01:0.01], law='fitzpatrick200
         arr = manager.list([])
         all_processes = []
         for j in range(threads):
-            all_processes.append(Process(target=do_ebv_process, args=(ebvs[j::threads], arr, responses)))
+            all_processes.append(Process(target=do_ebv_process, args=(wave,flux,ebvs[j::threads], arr, responses,law,Rv)))
             all_processes[-1].start()
         for p in all_processes:
             p.join()
@@ -368,5 +367,9 @@ if __name__=="__main__":
     #                      responses=responses, grid='munari')
 
     # Koester
-    calc_integrated_grid(threads=6, ebvs=evbs, law='fitzpatrick2004', Rv=3.1,
-                         responses=responses, grid='koester')
+    #calc_integrated_grid(threads=6, ebvs=evbs, law='fitzpatrick2004', Rv=3.1,
+    #                     responses=responses, grid='koester')
+
+    # # Kurucz, Rv = 2.5
+    calc_integrated_grid(threads=4, ebvs=evbs, law='fitzpatrick2004', Rv=2.5,
+                          responses=responses, grid='kurucz')

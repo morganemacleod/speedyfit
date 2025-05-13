@@ -38,7 +38,7 @@ def load_photometry_catalogs():
     The function will first look in the directory set with the SPEEDYFIT_MODELS environment variable. If no catalog
     files can be found in that directory, it will use the catalogs shipped with the speedyfit package.
     """
-    user_dir = os.environ.get('SPEEDYFIT_MODELS', None)
+    user_dir = '../sed_models/' #os.environ.get('SPEEDYFIT_MODELS', None)
 
     if user_dir is not None and os.path.exists(os.path.join(user_dir, VIZIER_CAT)):
         vizier_file = os.path.join(user_dir, VIZIER_CAT)
@@ -70,12 +70,13 @@ def copy_photometry_catalogs(overwrite=False):
     Copy the two photometry catalogs: vizier_cats_phot.cfg and tap_cats_phot.cfg from the package source location
     to the SPEEDYFIT_MODELS directory, so that the user can edit them.
     """
-    if os.environ.get('SPEEDYFIT_MODELS', None) is None:
-        print("SPEEDYFIT_MODELS env variable is not set, can not copy the photometry catalogs.")
-        return
-    else:
-        destination = os.environ.get('SPEEDYFIT_MODELS', None)
-
+    #if os.environ.get('SPEEDYFIT_MODELS', None) is None:
+    #    print("SPEEDYFIT_MODELS env variable is not set, can not copy the photometry catalogs.")
+    #    return
+    #else:
+    #    destination = os.environ.get('SPEEDYFIT_MODELS', None)
+    destination = '../sed_models/'
+    
     vis_cat = os.path.join(FILE_DIR, VIZIER_CAT)
     if os.path.exists(vis_cat) and not overwrite:
         print(f"The file {vis_cat} already exists. To overwrite existing files use option --overwrite")

@@ -140,11 +140,15 @@ def list_response(name='*', wave_range=(-np.inf, +np.inf)):
     else:
         name_ = name
 
+    #print("FILTERS: basedir=",basedir)
+
     curve_files = sorted(glob.glob(os.path.join(basedir, 'transmission_curves', name_.upper())))
 
     # -- select in correct wavelength range
     curve_files = [os.path.basename(curve_file) for curve_file in curve_files if
                    (wave_range[0] <= eff_wave(os.path.basename(curve_file)) <= wave_range[1])]
+
+    #print("curve files:",curve_files)
 
     return curve_files
 
