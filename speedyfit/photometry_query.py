@@ -75,7 +75,6 @@ def copy_photometry_catalogs(overwrite=False):
         return
     else:
         destination = os.environ.get('SPEEDYFIT_MODELS', None)
-    #destination = '../sed_models/'
     
     vis_cat = os.path.join(FILE_DIR, VIZIER_CAT)
     if os.path.exists(vis_cat) and not overwrite:
