@@ -1,10 +1,18 @@
 import numpy as np
 from numpy.lib.recfunctions import merge_arrays
+#from multiprocessing import Pool
 
 import emcee
 
 from . import statfunc, model, filters
 
+def normalized_autocorr_penalty(resid, max_lag=3):
+    penalty = 0.0
+    for lag in range(1, max_lag + 1):
+        ac = np.corrcoef(resid[:-lag], resid[lag:])[0, 1]
+        penalty += ac**2
+    return penalty / max_lag  # Normalize by number of lags
+    
 def lnlike(pars, derived_properties, y, yerr, **kwargs):
     """
     log likelihood function
@@ -32,12 +40,14 @@ def lnlike(pars, derived_properties, y, yerr, **kwargs):
         yerr_adjust = np.sqrt(yerr**2 + (y*np.exp(pars['lne']))**2 )
     else:
         yerr_adjust = yerr
-        
+       
     chi2, scales, e_scales = stat_func(y,
                                        yerr_adjust,
                                        colors, y_syn, pars,
                                        derived_properties=derived_properties,
                                        constraints=constraints)
+
+    
 
     #-- add distance to extra derived parameter (which already contains luminosities)
     #   distance is converted from Rsol to pc
@@ -46,8 +56,16 @@ def lnlike(pars, derived_properties, y, yerr, **kwargs):
     extra_drv['chi2'] = chi2
 
     yerr_term = np.sum(np.log(2*np.pi*yerr_adjust**2) )
+    ll_gaussian = -(chi2 + yerr_term)/2
+    my_ll = ll_gaussian
     
-    return -(chi2 + yerr_term)/2 , extra_drv
+    ## regularization
+    #resid = np.log(y)-np.log(y_syn)
+    #lambda_reg = 1e0
+    ## Structure penalty: autocorrelation
+    #my_ll = ll_gaussian - lambda_reg * normalized_autocorr_penalty(resid)
+    
+    return my_ll, extra_drv
 
 def lnprior(theta, derived_properties, limits, **kwargs):
     """
@@ -68,6 +86,22 @@ def lnprior(theta, derived_properties, limits, **kwargs):
     :rtype: float
     """
 
+    """
+    #-- create keyword parameters from theta
+    pars = {}
+    for name, value in zip(kwargs['pnames'], theta):
+        pars[name]=value
+
+    if ('ebv' in pars):
+        ebv_index = kwargs['pnames'].index('ebv')
+        if limits[ebv_index,0]>0: # then apply 1/x prior 
+            lnprior = np.log(1/theta[ebv_index])
+        else:
+            lnprior = 0.0
+    else:
+        lnprior = 0.0
+    """
+    
     derived_limits = kwargs.pop('derived_limits', {})
 
     #-- check if all parameters are within their limits
@@ -80,7 +114,7 @@ def lnprior(theta, derived_properties, limits, **kwargs):
                 derived_properties[lim] > derived_limits[lim][1]:
             return -np.inf
 
-    return 0
+    return 0.0 #lnprior
 
 def lnprob(theta, y, yerr, limits, **kwargs):
     """
@@ -161,6 +195,7 @@ def MCMC(obs, obs_err, photbands,
 
     # TODO: storing the blobs as dictionary with dtype object and then later converting to recarray is inefficient.
     # This needs to be addressed: provide the correct dtypes here and let emcee directly store them in recarray
+    #pool = Pool()
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, a=a,
                                     args=(obs, obs_err, limits), kwargs=kwargs, blobs_dtype=[('blob','O')])
 

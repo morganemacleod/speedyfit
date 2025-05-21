@@ -364,7 +364,7 @@ def write_summary2hdf5(objectname, samples, obs, obs_err, photbands, pars={}, gr
          
          y, x = np.histogram(samples[key], 20, density=False)
          x = (x[0:-1] + x[1:])/2.
-         y = y / np.float(np.max(y))
+         y = y /np.max(y)
          
          dis = Table([x, y], names=['x', 'y'])
          

@@ -123,3 +123,51 @@ plot2:
  path: <objectname>_distribution_single.png
  parameters: ['teff', 'rad', 'L', 'ebv', 'd', 'mass']
 """
+
+default_hb = """
+# photometry file with index to the columns containing the photbands, observations and errors
+objectname: <objectname>
+photometryfile: <photfilename>
+photband_index: band
+obs_index: flux
+err_index: eflux
+photband_exclude: <photband_exclude>
+# parameters to fit and the limits on them in same order as parameters
+pnames: [teff,logg, rad,ebv,lne]
+limits: 
+- [3500, 49000]
+- [0.0, 4.5]
+- [0.01, 1000]
+- [0.0, 2.0]
+- [-7,0]
+# constraints on distance and mass ratio is known
+constraints:
+ distance: [<distance>,1000]
+ ebv: <extinction>
+# added constraints on derived properties as mass, luminosity, luminosity ratio
+derived_limits: 
+ mass: [1,40]
+# path to the model grids with integrated photometry
+grids: 
+- <model_grids>
+# setup for the MCMC algorithm
+nwalkers: 100    # total number of walkers
+nsteps: <nsample>     # steps taken by each walker (not including burn-in)
+nrelax: <nrelax>      # burn-in steps taken by each walker
+a: 10            # relative size of the steps taken
+# set the percentiles for the error determination 
+percentiles: [16, 50, 84] # 16 - 84 corresponds to 1 sigma
+# output options
+resultfile: <objectname>_results_<model_grids>.csv   # filepath to write results
+h5file: <objectname>_summary_<model_grids>.h5
+plot1:
+ type: sed_fit
+ result: best
+ path: <objectname>_sed_<model_grids>.png
+plot2:
+ type: distribution
+ show_best: true
+ path: <objectname>_distribution_<model_grids>.png
+ parameters: ['teff','rad','ebv','lne']
+
+"""

@@ -347,8 +347,16 @@ def check_grid(grid):
 
 if __name__=="__main__":
 
-    responses = ['GALEX', 'IUE', 'STROMGREN', 'JOHNSON', 'GAIA3E', 'GAIA2', 'SKYMAPPER', 'APASS', 'SDSS', '2MASS', 'WISE']
-    evbs = np.r_[0:1.02:0.05]
+    responses = ['JOHNSON','COUSINS', 'GAIA3E', 'GAIA2', 'SKYMAPPER', 'APASS', 'SDSS', '2MASS', 'WISE']
+
+    #evbs = np.r_[0:1.26:0.05]
+
+    evbs = np.zeros(21)
+    evbs[1:] += np.logspace(-1.5,0.5,20)
+
+    
+    #print("available filters: ", filters.list_response() )
+    #print("selected:", responses)
 
     # Blackbody
     # calc_integrated_grid(threads=6, ebvs=evbs, law='fitzpatrick2004', Rv=3.1,
@@ -371,5 +379,8 @@ if __name__=="__main__":
     #                     responses=responses, grid='koester')
 
     # # Kurucz, Rv = 2.5
-    calc_integrated_grid(threads=4, ebvs=evbs, law='fitzpatrick2004', Rv=2.5,
-                          responses=responses, grid='kurucz')
+    #calc_integrated_grid(threads=4, ebvs=evbs, law='fitzpatrick2004', Rv=2.5,
+    #                      responses=responses, grid='kurucz')
+
+    calc_integrated_grid(threads='safe', ebvs=evbs, law='fitzpatrick2004', Rv=3.1,
+                          responses=responses, grid='kurucz_m05_31')

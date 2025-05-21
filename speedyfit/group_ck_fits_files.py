@@ -14,8 +14,8 @@ from astropy.io import fits
 
 
 ### NOTE: CHANGE THESE TO USE DIFFERENT FOLDER
-file_list = glob("/Users/morganmacleod/CODE/speedyfit/sed_models/ckm05/*.fits")
-filename_out = "sed_models/castellikurucz_z-0.5_seds.fits"
+file_list = glob("/Users/morganmacleod/CODE/speedyfit/sed_models/ckp05/*.fits")
+filename_out = "sed_models/castellikurucz_z+0.5_seds.fits"
 
 
 def logg_from_str(gg):

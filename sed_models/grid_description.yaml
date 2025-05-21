@@ -4,6 +4,9 @@ kurucz25:
 kurucz31:
     filename: 'kurucz93_z0.0_k2odfnew_sed'
     integrated_filename: 'ikurucz93_z0.0_k2odfnew_sed_lawfitzpatrick2004_Rv3.10'
+kurucz_m05_31:
+    filename: 'castellikurucz_z-0.5_seds'
+    integrated_filename: 'icastellikurucz_z-0.5_seds_lawfitzpatrick2004_Rv3.10'
 
 
 ## OLD FORMAT BELOW

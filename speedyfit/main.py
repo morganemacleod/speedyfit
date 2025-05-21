@@ -11,7 +11,7 @@ from astropy.io import ascii
 from numpy.lib.recfunctions import append_fields, repack_fields
 
 from speedyfit import mcmc, model, plotting, fileio, filters, photometry_query
-from speedyfit.default_setup import default_binary, default_single
+from speedyfit.default_setup import default_binary, default_single, default_hb
 
 
 def select_photometry(photbands, obs, obs_err, remove_nan=True, remove_color=True, include=None, exclude=None,
@@ -322,12 +322,22 @@ def plot_results(setup, results, samples, constraints, gridnames, obs, obs_err, 
             else:
                 truths = None
 
-            fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)),
-                                labels=data.dtype.names,
-                                quantiles=setup[pindex].get('quantiles', [0.16, 0.5, 0.84]),
-                                levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
-                                truths=truths,
-                                show_titles=True, title_kwargs={"fontsize": 12}, )
+            # Set custom axis limits (e.g., 1st to 99th percentile)
+            samples = data.view(np.float64).reshape(data.shape + (-1,))
+            ranges = []
+            for i in range(samples.shape[1]):
+                lower = np.percentile(samples[:, i], 1)
+                upper = np.percentile(samples[:, i], 99)
+                ranges.append((lower, upper))
+
+            
+            fig=corner.corner(samples,
+                          labels=data.dtype.names,
+                          quantiles=setup[pindex].get('quantiles', [0.16, 0.5, 0.84]),
+                          levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
+                          truths=truths,
+                          show_titles=True, title_kwargs={"fontsize": 12},
+                          range = ranges, bins=20)
 
             if not setup[pindex].get('path', None) is None:
                 pl.savefig(setup[pindex].get('path', 'distribution.png'))
@@ -337,62 +347,104 @@ def plot_results(setup, results, samples, constraints, gridnames, obs, obs_err, 
 # Command line stuff below.
 
 def create_setup(args):
-    object_name = args. object_name
+    object_name = args.object_name
     grid  = args.grid
     parallax = args.parallax
     photometry = args.photometry
-
+    exclude_ir = args.exclude_ir
+    location = args.location
+    nsample = args.nsample
+    nrelax = args.nrelax
+    extinction = args.extinction
+    
     filename = "{}_setup_{}.yaml".format(object_name, grid)
 
-    # excluded photometry
-    if grid == 'munari':
-        photband_exclude = "['GALEX', 'SDSS', 'WISE']"
-    else:
-        photband_exclude = "['GALEX', 'SKYMAPPER', 'SDSS', 'WISE.W3', 'WISE.W4']"
+    if args.hb ==False: # default 
 
-    # parameter ranges
-    if grid != 'binary':
-        ranges = model.get_grid_ranges(grid=grid)
-        ranges['ebv'] = (0, 0.10)
 
+        # excluded photometry
+        if grid == 'munari':
+            photband_exclude = "['GALEX', 'SDSS', 'WISE']"
+        else:
+            photband_exclude = "['GALEX', 'SKYMAPPER', 'SDSS', 'WISE.W3', 'WISE.W4']"
+
+        # parameter ranges
+        if grid != 'binary':
+            ranges = model.get_grid_ranges(grid=grid)
+            ranges['ebv'] = (0, 0.10)
+           
         parameter_limits = ""
         for par in ['teff', 'logg', 'rad', 'ebv']:
             parameter_limits += "\n- [{}, {}]".format(ranges[par][0], ranges[par][1])
-    else:
-        parameter_limits = "- [3500, 10000] \n- [4.31, 4.31] \n- [0.01, 2.5] \n"\
-                     "- [20000, 50000] \n- [5.8, 5.8] \n- [0.01, 0.5] \n- [0, 0.10]"
+        else:
+            parameter_limits = "- [3500, 10000] \n- [4.31, 4.31] \n- [0.01, 2.5] \n"\
+              "- [20000, 50000] \n- [5.8, 5.8] \n- [0.01, 0.5] \n- [0, 0.10]"
 
-    # constraints
-    constraints = "{}"
-    if parallax:
-        plx, e_plx = photometry_query.get_parallax(object_name)
-        if plx is not None and e_plx is not None:
-            constraints = "\n  parallax: [{:0.4f}, {:0.4f}]".format(plx, e_plx)
+        # constraints
+        constraints = "{}"
+        if parallax:
+            plx, e_plx = photometry_query.get_parallax(object_name)
+            if plx is not None and e_plx is not None:
+                constraints = "\n  parallax: [{:0.4f}, {:0.4f}]".format(plx, e_plx)
 
 
-    # grids
-    if grid == 'binary':
-        model_grids = "- kurucz\n- tmap"
-    else:
-        model_grids = "- {}".format(grid)
+        # grids
+        if grid == 'binary':
+            model_grids = "- kurucz\n- tmap"
+        else:
+            model_grids = "- {}".format(grid)
 
-    out = default_single if grid != 'binary' else default_binary
-    out = out.replace('<objectname>', object_name)
-    out = out.replace('<photfilename>', object_name + '.phot')
-    out = out.replace('<photband_exclude>', photband_exclude)
-    out = out.replace('<parameter_limits>', parameter_limits)
-    out = out.replace('<constraints>', constraints)
-    out = out.replace('<model_grids>', model_grids)
-    out = out.replace('<postfix>', grid)
+        out = default_single if grid != 'binary' else default_binary
+        out = out.replace('<objectname>', object_name)
+        out = out.replace('<photfilename>', object_name + '.phot')
+        out = out.replace('<photband_exclude>', photband_exclude)
+        out = out.replace('<parameter_limits>', parameter_limits)
+        out = out.replace('<constraints>', constraints)
+        out = out.replace('<model_grids>', model_grids)
+        out = out.replace('<postfix>', grid)
 
-    ofile = open(filename, 'w')
-    ofile.write(out)
-    ofile.close()
+        ofile = open(filename, 'w')
+        ofile.write(out)
+        ofile.close()
+
+   
+    else: # HB = TRUE
+        
+        # excluded photometry
+        if exclude_ir:
+            photband_exclude = "['GALEX','2MASS', 'WISE']"
+        else:
+            photband_exclude = "['GALEX','WISE.W3', 'WISE.W4']"
+
+        #  distance constraint
+        if location=='lmc':
+            distance = 49590
+        elif location=='smc':
+            distance = 62440
+        else:
+            print("LOCATION NOT RECOGNIZED")
+
+        out = default_hb
+        out = out.replace('<distance>',str(distance))
+        out = out.replace('<objectname>', object_name)
+        out = out.replace('<photfilename>', object_name + '.phot')
+        out = out.replace('<photband_exclude>', photband_exclude)
+        out = out.replace('<model_grids>',grid)
+        out = out.replace('<nsample>',str(nsample))
+        out = out.replace('<nrelax>',str(nrelax))
+        out = out.replace('<extinction>',str(extinction))
+
+        ofile = open(filename, 'w')
+        ofile.write(out)
+        ofile.close()
+
 
     if photometry:
         photometry = photometry_query.get_photometry(object_name, filename=object_name + '.phot')
-
+            
     print(f"To start the fit run:\n\tspeedyfit fit {filename}")
+
+
 
 
 def get_photometry(args):
@@ -472,8 +524,14 @@ def main():
                               help='Query Vizier and Tap archived for photometry of this system')
     setup_parser.add_argument('--nopx', dest='parallax', action='store_false',
                              help='Do NOT obtain parallax from the Gaia DR2 catalog')
+    setup_parser.add_argument('--hb',dest='hb',action='store_true',help='whether to use the hb star specific setup (MM)')
+    setup_parser.add_argument('--nsample',dest='nsample',default=3000)
+    setup_parser.add_argument('--nrelax',dest='nrelax',default=500)
+    setup_parser.add_argument('--location',dest='location',default='lmc',help='location lmc or smc for hb specific models')
+    setup_parser.add_argument('--exclude_ir',dest='exclude_ir',action='store_true',help='whether to exclude 2MASS and WISE data completely')
+    setup_parser.add_argument('--extinction',dest='extinction',default=str([0,0,0]), help='provide extinction, mean, -/+ sigma')
     setup_parser.set_defaults(func=create_setup)
-
+    
     # --photometry--
     phot_parser = subparsers.add_parser('photometry', aliases=['phot'] , help='Get photometry from catalogs')
 
