@@ -384,3 +384,6 @@ if __name__=="__main__":
 
     calc_integrated_grid(threads='safe', ebvs=evbs, law='fitzpatrick2004', Rv=3.1,
                           responses=responses, grid='kurucz_m05_31')
+
+    #calc_integrated_grid(threads='safe', ebvs=evbs, law='fitzpatrick2004', Rv=2.5,
+    #                      responses=responses, grid='kurucz_m05_2.5')

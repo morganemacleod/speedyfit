@@ -7,6 +7,10 @@ kurucz31:
 kurucz_m05_31:
     filename: 'castellikurucz_z-0.5_seds'
     integrated_filename: 'icastellikurucz_z-0.5_seds_lawfitzpatrick2004_Rv3.10'
+kurucz_m05_25:
+    filename: 'castellikurucz_z-0.5_seds'
+    integrated_filename: 'icastellikurucz_z-0.5_seds_lawfitzpatrick2004_Rv2.50'
+
 
 
 ## OLD FORMAT BELOW

@@ -2,3 +2,4 @@ include speedyfit/tap_cats_phot.cfg
 include speedyfit/vizier_cats_phot.cfg
 include speedyfit/zeropoints.dat
 include speedyfit/redlaws/*.red
+include speedyfit/transmission_curves/*.*

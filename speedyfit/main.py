@@ -326,8 +326,8 @@ def plot_results(setup, results, samples, constraints, gridnames, obs, obs_err, 
             samples = data.view(np.float64).reshape(data.shape + (-1,))
             ranges = []
             for i in range(samples.shape[1]):
-                lower = np.percentile(samples[:, i], 1)
-                upper = np.percentile(samples[:, i], 99)
+                lower = np.percentile(samples[:, i], 3)
+                upper = np.percentile(samples[:, i], 97)
                 ranges.append((lower, upper))
 
             
@@ -412,9 +412,9 @@ def create_setup(args):
         
         # excluded photometry
         if exclude_ir:
-            photband_exclude = "['GALEX','2MASS', 'WISE']"
+            photband_exclude = "['GALEX','APASS','SKYMAPPER','2MASS', 'WISE']"
         else:
-            photband_exclude = "['GALEX','WISE.W3', 'WISE.W4']"
+            photband_exclude = "['GALEX','APASS','SKYMAPPER','WISE.W3', 'WISE.W4']"
 
         #  distance constraint
         if location=='lmc':
