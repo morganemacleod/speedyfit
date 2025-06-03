@@ -75,6 +75,11 @@ def get_derived_properties(**pars):
         l2 = (derived_properties['rad2'] ** 2 * pars['teff2'] ** 4)
         derived_properties['lr'] = l1 / l2
 
+
+    # -- temperature ratio (MM)
+    if 'teff' in pars  and 'teff2' in pars:
+        derived_properties['tr'] = pars['teff']/pars['teff2']
+        
     # -- derive radius ratio
     if 'rad' in pars and 'rad2' in pars:
         derived_properties['rr'] = pars['rad'] / pars['rad2']

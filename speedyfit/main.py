@@ -412,7 +412,7 @@ def create_setup(args):
         
         # excluded photometry
         if exclude_ir:
-            photband_exclude = "['GALEX','APASS','SKYMAPPER','2MASS', 'WISE']"
+            photband_exclude = "['GALEX','APASS','SKYMAPPER','2MASS.H','2MASS.KS', 'WISE']"
         else:
             photband_exclude = "['GALEX','APASS','SKYMAPPER','WISE.W3', 'WISE.W4']"
 
@@ -427,7 +427,7 @@ def create_setup(args):
         out = default_hb
         out = out.replace('<distance>',str(distance))
         out = out.replace('<objectname>', object_name)
-        out = out.replace('<photfilename>', object_name + '.phot')
+        out = out.replace('<photfilename>', object_name + '.photclean')
         out = out.replace('<photband_exclude>', photband_exclude)
         out = out.replace('<model_grids>',grid)
         out = out.replace('<nsample>',str(nsample))
